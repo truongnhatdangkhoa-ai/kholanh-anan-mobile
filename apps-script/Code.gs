@@ -263,6 +263,9 @@ function doPost(e) {
       // PC 1.61 — Mã truy cập GitHub (kho riêng tư) dùng chung: lưu ở Thuộc tính tập lệnh GITHUB_TOKEN (KHÔNG nằm trong Sheet) để máy mới tự lấy về
       case 'pc.ghTokenGet': return json_(pcGhTokenGet_());
       case 'pc.ghTokenSet': return json_(pcGhTokenSet_(req.token));
+      // PC 3.21 — cấu hình NGUỒN cập nhật (kho + nhánh + mã) dùng chung: GITHUB_REPO / GITHUB_BRANCH / GITHUB_TOKEN. Máy nào cũng hỏi mỗi lần kiểm tra cập nhật → đổi kho chỉ cần sửa ở đây.
+      case 'pc.ghSourceGet': return json_(pcGhSourceGet_());
+      case 'pc.ghSourceSet': return json_(pcGhSourceSet_(req));
       default: return json_({ ok: false, error: 'Không có chức năng "' + action + '".' });
     }
   } catch (err) {
@@ -1313,6 +1316,23 @@ function pcGhTokenSet_(token) {
   var p = PropertiesService.getScriptProperties(), t = String(token || '').trim();
   if (t) p.setProperty('GITHUB_TOKEN', t); else p.deleteProperty('GITHUB_TOKEN');
   return { ok: true, cleared: !t };
+}
+
+// PC 3.21 — NGUỒN CẬP NHẬT (kho + nhánh + mã) trong Thuộc tính tập lệnh. Sửa trực tiếp ở Project Settings › Script properties cũng được (không cần triển khai lại),
+// hoặc admin bấm Lưu ở Cài đặt › Cập nhật trong app PC. Trường để trống khi LƯU = không đổi (trừ khi gửi rõ chuỗi rỗng '' → xóa trường đó).
+function pcGhSourceGet_() {
+  var p = PropertiesService.getScriptProperties();
+  var repo = String(p.getProperty('GITHUB_REPO') || '').trim(), branch = String(p.getProperty('GITHUB_BRANCH') || '').trim(), token = String(p.getProperty('GITHUB_TOKEN') || '').trim();
+  return (repo || branch || token) ? { ok: true, repo: repo, branch: branch, token: token } : { ok: true, empty: true };
+}
+function pcGhSourceSet_(req) {
+  var p = PropertiesService.getScriptProperties();
+  [['GITHUB_REPO', 'repo'], ['GITHUB_BRANCH', 'branch'], ['GITHUB_TOKEN', 'token']].forEach(function (kv) {
+    if (req[kv[1]] === undefined || req[kv[1]] === null) return;   // không gửi = giữ nguyên
+    var v = String(req[kv[1]]).trim();
+    if (v) p.setProperty(kv[0], v); else p.deleteProperty(kv[0]);
+  });
+  return { ok: true };
 }
 
 // tabs: { tenTab: [tiêu đề...] | null }
