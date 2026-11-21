@@ -1,7 +1,7 @@
 /* ui-scale.js — Cỡ chữ của app điện thoại, chỉnh theo % (Cài đặt › Cỡ chữ).
    Mọi cỡ chữ trong CSS là calc(Npx * var(--fs, 1)); file này chỉ việc đặt --fs = % / 100 lên <html>.
    Lưu ở localStorage 'klanan.fontScale' (số nguyên %, 80–150, mặc định 100). Nạp ĐẦU TIÊN trong <head> của mọi trang
-   (index.html + các trang chạy trong iframe: luu-tru.html, tao-ma-qr.html) để chữ đúng cỡ ngay từ lúc vẽ trang, không nháy. */
+   (index.html + các trang chạy trong iframe: tao-ma-qr.html) để chữ đúng cỡ ngay từ lúc vẽ trang, không nháy. */
 (function () {
   var KEY = 'klanan.fontScale', MIN = 80, MAX = 150, DEF = 100;
   function clamp(v) { v = Math.round(Number(v)); return isFinite(v) ? Math.min(MAX, Math.max(MIN, v)) : DEF; }
