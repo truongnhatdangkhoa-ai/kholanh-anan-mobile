@@ -2054,7 +2054,7 @@
     }) });
   }
   let phieuBase = [];
-  // ĐT 1.44 — THỐNG KÊ SIZE đã làm phiếu (kho Tồn vị trí An An): mỗi Size bao nhiêu kiện đã xuất hôm nay (PC đẩy "Xuất hôm nay"), chờ PC, đang soạn; kèm đặc tính đã gộp.
+  // ĐT 1.44 — THỐNG KÊ SIZE đã làm phiếu (kho Tồn vị trí An An): tổng kiện mỗi Size trong phiếu đang soạn (không gộp theo ngày); kèm đặc tính đã gộp.
   function renderVtStat() {
     const host = $('phieuStat');
     if (!host) return;
@@ -2066,18 +2066,17 @@
       if (l.nhomDt) o.dts.add(l.nhomDt);
       return o;
     };
-    lots.forEach((l) => { if (l.homNay > 0 || l.cho > 0) { const o = get(l); o.done += l.homNay > 0 ? l.homNay : 0; o.cho += l.cho > 0 ? l.cho : 0; } });
     if (state.cart && state.cart.items.length && state.cart.module === 'M01VT') {
       const byKey = new Map(lots.map((l) => [l.key, l]));
       state.cart.items.forEach((it) => { const l = byKey.get(it.key); if (l) get(l).soan += num(it.qty); });
     }
-    const L = Array.from(by.values()).filter((o) => o.done || o.cho || o.soan).sort((a, b) => natCmp(a.k, b.k));
+    const L = Array.from(by.values()).filter((o) => o.soan).sort((a, b) => natCmp(a.k, b.k));
     if (!L.length) { host.innerHTML = ''; return; }
-    let td = 0, tc = 0, ts = 0;
-    const rows = L.map((o) => { td += o.done; tc += o.cho; ts += o.soan; return `<tr><td><b>${esc(o.k)}</b></td><td>${esc(Array.from(o.dts).sort().join(', ') || '—')}</td><td class="n">${fmt(o.done)}</td><td class="n">${o.cho ? fmt(o.cho) : ''}</td><td class="n">${o.soan ? fmt(o.soan) : ''}</td></tr>`; }).join('');
-    host.innerHTML = `<details class="vt-stat" open><summary><b>📊 Size đã làm phiếu hôm nay</b> <small>(Tồn vị trí An An)</small></summary>
-      <table><thead><tr><th>Size</th><th>Đặc tính</th><th class="n">Đã xuất</th><th class="n">Chờ PC</th><th class="n">Soạn</th></tr></thead><tbody>${rows}</tbody>
-      <tfoot><tr><td colspan="2"><b>Tổng</b></td><td class="n"><b>${fmt(td)}</b></td><td class="n"><b>${tc ? fmt(tc) : ''}</b></td><td class="n"><b>${ts ? fmt(ts) : ''}</b></td></tr></tfoot></table></details>`;
+    let ts = 0;
+    const rows = L.map((o) => { ts += o.soan; return `<tr><td><b>${esc(o.k)}</b></td><td>${esc(Array.from(o.dts).sort().join(', ') || '—')}</td><td class="n">${fmt(o.soan)}</td></tr>`; }).join('');
+    host.innerHTML = `<details class="vt-stat" open><summary><b>📊 Tổng size trong phiếu</b> <small>(Tồn vị trí An An)</small></summary>
+      <table><thead><tr><th>Size</th><th>Đặc tính</th><th class="n">Tổng</th></tr></thead><tbody>${rows}</tbody>
+      <tfoot><tr><td colspan="2"><b>Tổng</b></td><td class="n"><b>${fmt(ts)}</b></td></tr></tfoot></table></details>`;
   }
   function renderPhieu() {
     try { renderVtStat(); } catch (e) { /* thống kê lỗi không được làm hỏng trang Phiếu */ }
