@@ -14,8 +14,6 @@
  *   M01   Tồn kho An An    → PC chưa có mẫu phiếu riêng: dùng CÙNG kiểu "PHIẾU XUẤT" của Module 01.
  *   M03   NXT Bột/Sốt      → PC chưa có mẫu phiếu riêng: kiểu Excel của Module 03 (Times New Roman
  *                            14, viền đen) — cột giống bảng "Chọn hàng xuất".
- *   M04   NXT TNK/TGC      → PC chưa có mẫu phiếu riêng: kiểu exportTableToExcel() của Module 04
- *                            (Times New Roman 15, viền đen, dòng "Tổng cộng").
  * PDF/PNG: dựng đúng bố cục đó bằng HTML rồi chụp (html2canvas) — font PDF mặc định không có dấu
  * tiếng Việt nên PDF cũng đi đường ảnh, giống cách app PC làm.
  * Thư viện (lib/*.js) chỉ tải khi bấm xuất lần đầu, không làm chậm lúc mở app.
@@ -158,20 +156,6 @@
         rows, totals: ['Tổng cộng', '', '', '', '', '', sb, sk], style: 'm3',
       };
     }
-    if (ph.module === 'M04') {
-      let sq = 0, sn = 0;
-      const rows = items.map((it) => {
-        const q = num(it.qty), w = num(it.weight);
-        sq += q; sn += q * w;
-        return [it.type || '', it.supplier || '', it.inv || '', it.po || '', it.maHang || '', it.dacTinh || '', it.size || '', it.viTri || '', w, q, q * w];
-      });
-      return {
-        title: 'PHIẾU XUẤT HÀNG', meta: note,
-        cols: [{ label: 'Loại hàng' }, { label: 'Nhà cung cấp' }, { label: 'INV' }, { label: 'TP/PO' }, { label: 'Mã hàng' }, { label: 'Đặc tính' },
-          { label: 'Size' }, { label: 'Vị trí' }, { label: 'Trọng lượng', num: true, dec: 2 }, { label: 'SL xuất', num: true }, { label: 'Net (kg)', num: true, dec: 2 }],
-        rows, totals: ['Tổng cộng', '', '', '', '', '', '', '', '', sq, sn], style: 'm4',
-      };
-    }
     // M02 — Phiếu yêu cầu xuất hàng. Không in dòng "Mã phiếu | Người lập | Ngày lập" (không cần thiết,
     // và để khớp đúng mẫu bên PC — buildPxPhieuWorkbook() không có dòng này); chỉ giữ Ghi chú nếu có.
     let sq = 0;
@@ -270,7 +254,7 @@
     } else {
       // ---- Mẫu "PHIẾU XUẤT" dạng bảng: tiêu đề + dòng thông tin (gộp toàn bề rộng), tiêu đề cột,
       // dữ liệu, dòng tổng. Kiểu chữ/màu theo đúng module. ----
-      const size = t.style === 'm4' ? 15 : 14;
+      const size = 14;
       const FONT = { name: 'Times New Roman', size };
       const blueHeader = t.style === 'm1';
       const lay = t.layout || {};
@@ -420,7 +404,7 @@
     return pdf.output('blob');
   }
 
-  const PREFIX = { M02: 'PYC', M01: 'PhieuXuat_TonKhoAnAn', M01VT: 'PhieuXuat_ViTri', M01VTB: 'PhieuXuat_ViTriBot', M03: 'PhieuXuat_BotSot', M04: 'PhieuXuat_TNK-TGC' };
+  const PREFIX = { M02: 'PYC', M01: 'PhieuXuat_TonKhoAnAn', M01VT: 'PhieuXuat_ViTri', M01VTB: 'PhieuXuat_ViTriBot', M03: 'PhieuXuat_BotSot' };
   // Mã phiếu tự sinh (app.js stamp(): "DT260924-1419", có thể kèm "-2" nếu trùng) -> tên file có tiền tố theo module.
   // Phiếu do người dùng TỰ ĐẶT TÊN (VD "PYC_02") -> tên file GIỮ NGUYÊN đúng như đã đặt, không thêm tiền tố.
   const AUTO_MA = /^DT\d{6}-\d{4}(-\d+)?$/;

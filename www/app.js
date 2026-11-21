@@ -25,7 +25,7 @@
   // Tăng mỗi lần sửa app.js — hiện ở cuối Cài đặt để kiểm tra điện thoại đang chạy đúng bản chưa.
   // ĐÁNH SỐ LẠI TỪ 1.1 (30/09/2026, trước đó 3.x) — tăng mỗi lần phát hành; nhớ đổi cả ?v= trong index.html
   // và "version" trong package.json (GitHub Actions lấy số đó làm versionName của APK).
-  const APP_VERSION = '1.37 (13/11/2026)';
+  const APP_VERSION = '1.46 (21/11/2026)';
   const PAGE = 50;
 
   // Tên cột — PHẢI khớp tab TonKho_M02 (M2_PUSH_COLUMNS trong main.js của app PC).
@@ -74,22 +74,21 @@
   const normHeader = (h) => norm(h).replace(/[.,()\/\\\-_:;]/g, ' ').replace(/\s+/g, ' ').trim();
   const findHeader = (headers, name) => { const n = normHeader(name); return headers.findIndex((h) => normHeader(h) === n); };
   const isHiddenCol = (h) => String(h).startsWith('_');
-  const SRC_OF = { M02: 'm02', M01: 'm01', M01VT: 'vitri', M01VTB: 'vitribot', M03: 'm03', M04: 'm04' };
-  const SRC_LABEL = { M02: 'Tồn kho gửi (M02)', M01: 'Tồn kho An An (M01)', M01VT: 'Vị trí (M01)', M01VTB: 'Vị trí Bột (M01)', M03: 'NXT Bột/Sốt (M03)', M04: 'NXT TNK/TGC (M04)' };
+  const SRC_OF = { M02: 'm02', M01: 'm01', M01VT: 'vitri', M01VTB: 'vitribot', M03: 'm03' };
+  const SRC_LABEL = { M02: 'Tồn kho gửi (M02)', M01: 'Tồn kho An An (M01)', M01VT: 'Vị trí (M01)', M01VTB: 'Vị trí Bột (M01)', M03: 'NXT Bột/Sốt (M03)' };
   const SRC_DEST = {
     M02: 'Module 02 (tab Phiếu Xuất)',
     M01: 'Module 01 (Tổng Hợp → Xuất Hàng)',
     M01VT: 'Module 01 (Tồn theo vị trí → Phiếu xuất từ điện thoại)',
     M01VTB: 'Module 01 (Vị Trí Bột → Phiếu xuất từ điện thoại)',
-    M03: 'Module 03 (Xuất sử dụng, mã PX_…)',
-    M04: 'Module 04 (Xuất hàng)'
+    M03: 'Module 03 (Xuất sử dụng, mã PX_…)'
   };
   const modOf = (m) => (SRC_OF[m] ? m : 'M02');
   // Toàn bộ kho điện thoại biết đọc. Kho nằm trong HIDDEN_SOURCES bị ẨN khỏi app (không tải, không hiện ở
   // Trang chủ / Chọn kho / tìm mã) nhưng code vẫn giữ nguyên — muốn dùng lại chỉ cần bỏ khỏi danh sách ẩn.
   // Phiếu CŨ của kho đang ẩn vẫn hiện ở tab Phiếu (xem, xuất file, xóa khi PC chưa nhận).
-  const ALL_SOURCES = ['m02', 'm01', 'vitri', 'vitribot', 'm03', 'm04'];
-  // 09/2026: M03 / M04 từng tạm ẩn — đã MỞ LẠI vì có phân quyền theo tài khoản (ai không được tick M03/M04 trong
+  const ALL_SOURCES = ['m02', 'm01', 'vitri', 'vitribot', 'm03'];
+  // 09/2026: M03 từng tạm ẩn — đã MỞ LẠI vì có phân quyền theo tài khoản (ai không được tick M03 trong
   // "Kho được dùng" thì applyPerms() tự ẩn). Muốn ẩn hẳn 1 kho cho mọi người thì thêm mã vào đây, VD ['m03'].
   const HIDDEN_SOURCES = [];
   // SOURCES = kho đang dùng được = bỏ kho ẩn + bỏ kho token không có quyền (applyPerms() tính lại khi biết quyền).
@@ -102,8 +101,7 @@
     m01: { name: 'Tồn kho An An', mod: 'Module 01', desc: 'tồn cuối', place: 'HĐ', placeOf: (it) => it.hopDong },
     vitri: { name: 'Tồn vị trí An An', mod: 'Module 01', desc: 'theo ô vị trí', place: 'Vị trí', placeOf: (it) => it.viTri },
     vitribot: { name: 'Vị trí Bột', mod: 'Module 01', desc: 'theo ô vị trí · HSD', place: 'Vị trí', placeOf: (it) => it.viTri },
-    m03: { name: 'NXT Bột / Sốt', mod: 'Module 03', desc: 'theo lô, cần LSX', place: 'Vị trí', placeOf: (it) => it.viTri },
-    m04: { name: 'NXT TNK / TGC', mod: 'Module 04', desc: 'lô × vị trí', place: 'Vị trí', placeOf: (it) => it.viTri }
+    m03: { name: 'NXT Bột / Sốt', mod: 'Module 03', desc: 'theo lô, cần LSX', place: 'Vị trí', placeOf: (it) => it.viTri }
   };
   // Phần quy cách/trọng lượng trong Tên hàng An An, VD "Tôm TCT vỏ (An An), Block, …, 16 (1.8 kg x 6 gói)
   // - 23.MKS-CANA - GK" → "1.8 kg x 6 gói": nhóm (…) CUỐI CÙNG trong phần trước " - " có chữ số + đơn vị
@@ -142,15 +140,14 @@
       m02: [['Size', it.size], ['PN', it.phieuNhap]],
       vitri: [['Lô', it.soLo]],
       m01: [['Size', it.size]],
-      m03: [['LSX', it.lsx], ['Phiếu', it.maPhieuLo]],
-      m04: [['Size', it.size], ['INV', it.inv]]
+      m03: [['LSX', it.lsx], ['Phiếu', it.maPhieuLo]]
     }[src] || [];
     if (l.sizeTag) extra = extra.filter(([k]) => k !== 'Size');
     // Tồn kho gửi (M02): Đặc tính đứng TRƯỚC tên hàng (tên dài hay bị cắt "…" ở cuối dòng).
     if (src === 'm02' && String(it.dacTinh || '').trim()) {
       return [noTpc(it.dacTinh), noTpc(it.tenHang || '')].concat(extra.filter(([, v]) => v !== '' && v != null).map(([k, v]) => k + ' ' + noTpc(v))).filter(Boolean).join(' · ');
     }
-    const name = src === 'm03' ? (it.loaiHang || it.tenHang) : src === 'm04' ? (it.type || '') : (it.tenHang || '');
+    const name = src === 'm03' ? (it.loaiHang || it.tenHang) : (it.tenHang || '');
     return [noTpc(name)].concat(extra.filter(([, v]) => v !== '' && v != null).map(([k, v]) => k + ' ' + noTpc(v))).filter(Boolean).join(' · ');
   }
   const fmt = (n) => Number(n || 0).toLocaleString('en-US', { maximumFractionDigits: 2 });
@@ -166,8 +163,13 @@
   const load = (k, dflt) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : dflt; } catch (e) { return dflt; } };
   const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* đầy bộ nhớ: bỏ qua bản lưu tạm */ } };
   const newId = () => 'dt_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8);
-  const stamp = () => {
+  const stamp = (mod) => {
     const d = new Date(); const p = (x) => String(x).padStart(2, '0');
+    if (mod === 'M01VT') {   // ĐT 1.46: phiếu Tồn theo vị trí = DTVT-ddmmyyNN (NN = số phiếu trong ngày), PC dùng làm mã phiếu
+      const pre = 'DTVT-' + p(d.getDate()) + p(d.getMonth() + 1) + p(d.getFullYear() % 100); let mx = 0;
+      ((state.phieu && state.phieu.data && state.phieu.data.list) || []).forEach((x) => { const c = String(x.maPhieu || ''); if (c.indexOf(pre) === 0) { const n = parseInt(c.slice(pre.length), 10); if (isFinite(n) && n > mx) mx = n; } });
+      return pre + p(mx + 1);
+    }
     return 'DT' + String(d.getFullYear()).slice(2) + p(d.getMonth() + 1) + p(d.getDate()) + '-' + p(d.getHours()) + p(d.getMinutes());
   };
   // Ngày hôm nay dạng yyyy-mm-dd (giá trị mặc định cho <input type="date">).
@@ -190,8 +192,8 @@
     // Tab Tồn kho: xem 5 bảng như Xuất kho (dùng chung dữ liệu đã lưu trên máy, không tải 2 lần).
     tonMode: SOURCES.includes(load('klanan.tonMode', defaultKho())) ? load('klanan.tonMode', defaultKho()) : defaultKho(),
     m02: null, m01: null, vitri: null, vitribot: null, phieu: null,  // { data, fetchedAt, error }
-    lots: { m02: [], m01: [], vitri: [], vitribot: [], m03: [], m04: [] }, // dòng có thể xuất, theo từng nguồn
-    tonRows: { m02: [], m01: [], vitri: [], vitribot: [], m03: [], m04: [] },
+    lots: { m02: [], m01: [], vitri: [], vitribot: [], m03: [] }, // dòng có thể xuất, theo từng nguồn
+    tonRows: { m02: [], m01: [], vitri: [], vitribot: [], m03: [] },
     q: { xuat: '', xuat2: '', ton: '', home: '' },
     // Lọc theo nhiều cột cùng lúc (nút cạnh ô tìm kiếm): colf.xuat[nguồn] / colf.ton[nguồn] = { khóa cột: [các giá trị đã tick] }.
     // Lưu riêng theo từng nguồn để đổi nguồn không mất bộ lọc đang gõ của nguồn kia.
@@ -236,7 +238,6 @@
   // Xếp cont 3D (module PC 12, quyền M14): mã chung / Web App cũ chưa có danh sách quyền PC → đủ quyền
   const canScan = () => !state.me || (state.me.kho || []).includes('SCAN'); // ĐT 0.5: Scan tài liệu — mã kho 'SCAN'
   const canQr = () => !state.me || (state.me.kho || []).includes('QR'); // ĐT 0.17: Tạo mã QR — mã kho 'QR' (PC: M17)
-  const canLt = () => !state.me || (state.me.kho || []).includes('LT'); // ĐT 1.02: Lưu trữ cá nhân — mã kho 'LT' (PC: M19)
   const canC3d = () => !state.me || (state.me.kho || []).includes('C3D'); // quyền điện thoại RIÊNG: mã kho 'C3D' (Cài đặt › Tài khoản › Kho điện thoại)
   const canView = (k) => !state.me || (state.me.kho || []).includes(TABLE_OF[k]);
   // Quyền xem trang Báo cáo của từng nguồn (mã BC01 / BC02 trong "Kho được dùng").
@@ -282,19 +283,18 @@
     const hasKho = SOURCES.length > 0;
     // Trang chủ còn là nơi xem lịch xuất nhập hôm nay (bản 3.0) → tài khoản chỉ có quyền LX vẫn có Trang chủ.
     if (t === 'home') return hasKho || canLx() || !(canView('m08') || REPORT_SRCS.some(canReport) || canC3d() || canScan());
-    if (t === 'xuat') return hasKho || !(canView('m08') || REPORT_SRCS.some(canReport) || canLx() || canC3d() || canScan() || canQr() || canLt());
+    if (t === 'xuat') return hasKho || !(canView('m08') || REPORT_SRCS.some(canReport) || canLx() || canC3d() || canScan() || canQr());
     if (t === 'phieu') return hasKho && canCreate();
     if (t === 'baocao') return REPORT_SRCS.some(canReport);
     if (t === 'm8') return canView('m08');
-    if (t === 'tools') return canC3d() || canScan() || canQr() || canLt(); // tab Công cụ = Xếp cont 3D + Scan + Tạo mã QR + Lưu trữ cá nhân
+    if (t === 'tools') return canC3d() || canScan() || canQr(); // tab Công cụ = Xếp cont 3D + Scan + Tạo mã QR
     if (t === 'c3d') return canC3d();   // màn con của Công cụ (không còn nút riêng ở thanh tab)
     if (t === 'scan') return canScan(); // màn con của Công cụ
     if (t === 'qr') return canQr();     // màn con của Công cụ (ĐT 0.17)
-    if (t === 'lt') return canLt();     // màn con của Công cụ (ĐT 1.02)
     return false;
   }
   const firstTab = () => ['home', 'xuat', 'baocao', 'm8', 'tools'].find(tabOk) || 'home';
-  const TOOL_TABS = ['c3d', 'scan', 'qr', 'lt'];
+  const TOOL_TABS = ['c3d', 'scan', 'qr'];
   const tabBtnOf = (t) => (TOOL_TABS.includes(t) ? 'tools' : t); // Xếp cont / Scan sáng tab Công cụ
   function showTabUi() {
     document.querySelectorAll('.tab').forEach((b) => b.classList.toggle('is-on', b.dataset.tab === tabBtnOf(state.tab)));
@@ -314,7 +314,7 @@
   }
 
   // ---- Kho lưu dữ liệu trên máy: IndexedDB (dung lượng lớn), dự phòng localStorage ----
-  const CACHE_KEYS = ['m02', 'vitri', 'vitribot', 'm01', 'm03', 'm04', 'm08', 'phieu', 'ks', 'lx']; // ks = kháng sinh tải dần (bản 2.0)
+  const CACHE_KEYS = ['m02', 'vitri', 'vitribot', 'm01', 'm03', 'm08', 'phieu', 'ks', 'lx']; // ks = kháng sinh tải dần (bản 2.0)
   const store = (() => {
     let dbp = null;
     const open = () => {
@@ -356,7 +356,7 @@
     }
   }
   // Bảng trên Google Sheet ứng với từng nguồn — để so mốc "PC đẩy lúc" (Meta.lastPushAt_<bảng>).
-  const TABLE_OF = { m02: 'M02', m01: 'M01', vitri: 'M01VT', vitribot: 'M01VTB', m03: 'M03', m04: 'M04', m08: 'M08' };
+  const TABLE_OF = { m02: 'M02', m01: 'M01', vitri: 'M01VT', vitribot: 'M01VTB', m03: 'M03', m08: 'M08' };
   const stampIn = (meta, k) => (meta && (meta['lastPushAt_' + TABLE_OF[k]] || meta.lastPushAt)) || '';
   // "Ngày số liệu" (dd/mm/yyyy) người dùng nhập ở Load Data trên PC — ngày CỦA số tồn, khác giờ PC đẩy lên.
   const DATA_DATE_KEY = { m01: 'm01DataDate', vitri: 'm01ViTriDataDate', vitribot: 'm01ViTriBotDataDate', m02: 'm02DataDate' };
@@ -565,9 +565,7 @@
       l.sizeTag = tag(it.maHang, it.tenHang);
       // Mã Kho gửi thường KHÔNG đủ 21 ký tự (VD "VRHOITN0085JPA10023") → không đọc được nhãn từ mã → dùng cột Size
       // nếu nó đã là nhãn có chữ đứng trước (VD "NL85") để gõ "NL 85" vẫn ra. Size chỉ có số ("50") thì KHÔNG dùng.
-      // M04: nhãn = Loại hàng + Size ("TGC 51/60"). GIỐNG main.js › buildGlobalSearchData() trên PC.
       if (!l.sizeTag && k === 'm02' && /^[A-Za-zÀ-ỹĐđ]+\s*\d/.test(String(it.size || '').trim())) l.sizeTag = String(it.size).trim();
-      if (!l.sizeTag && k === 'm04' && String(it.type || '').trim() && String(it.size || '').trim()) l.sizeTag = String(it.type).trim() + ' ' + String(it.size).trim();
       if (l.sizeTag) l.s += ' ' + norm(l.sizeTag);
     }));
   }
@@ -646,7 +644,8 @@
       const h = dv.headers;
       const iKey = h.indexOf('_key'), iSl = findHeader(h, 'SL Tồn'), iMa = findHeader(h, 'Mã hàng'),
             iTen = findHeader(h, 'Tên hàng'), iLo = findHeader(h, 'Lô (Batch)'), iVt = findHeader(h, 'Vị trí'),
-            iDvt = findHeader(h, 'ĐVT'), iTl = findHeader(h, 'T.Lượng');
+            iDvt = findHeader(h, 'ĐVT'), iTl = findHeader(h, 'T.Lượng'),
+            iDx = findHeader(h, 'Đã xuất'), iHn = findHeader(h, 'Xuất hôm nay'), iNd = findHeader(h, 'Nhóm đặc tính'); // ĐT 1.44: cột phụ PC 3.00
       state.lots.vitriReady = iKey >= 0 && iSl >= 0;
       if (state.lots.vitriReady) {
         const pending = dv.pending || {};
@@ -661,6 +660,7 @@
             raw: r, module: 'M01VT', key, title: v(r, iMa) || v(r, iTen), unit: String(v(r, iDvt) || 'SL'),
             subs: [['Vị trí', shortPlace(v(r, iVt))], ['Đặc tính', dt], ['Hợp đồng', hd]], // Lô chỉ xem trong bảng chi tiết / bảng xuất
             soKien, cho, con: soKien - cho,
+            daXuat: iDx >= 0 ? looseNum(r[iDx]) : 0, homNay: iHn >= 0 ? looseNum(r[iHn]) : 0, nhomDt: iNd >= 0 ? String(r[iNd] || '').trim() : dt,
             item: { itemKey, maHang: v(r, iMa), tenHang: v(r, iTen), soLo: v(r, iLo), viTri: v(r, iVt), dvt: v(r, iDvt), tl: looseNum(v(r, iTl)), soKien },
             s: norm([v(r, iMa), v(r, iTen), v(r, iLo), v(r, iVt)].join(' '))
           };
@@ -730,35 +730,6 @@
         });
       }
     }
-    // ---- Module 04 (NXT TNK/TGC): theo lô nhập × vị trí (cột "_key"), tồn = "SL tồn". ----
-    const d4 = state.m04 && state.m04.data;
-    state.lots.m04 = [];
-    state.lots.m04Ready = false;
-    if (d4 && d4.headers) {
-      const h = d4.headers;
-      const ix = (n) => findHeader(h, n);
-      const iKey = h.indexOf('_key'), iTon = ix('SL tồn');
-      state.lots.m04Ready = iKey >= 0 && iTon >= 0;
-      if (state.lots.m04Ready) {
-        const pending = d4.pending || {};
-        const v = (r, i) => (i >= 0 ? r[i] : '');
-        const [iType, iSup, iInv, iPo, iCode, iDt, iSize, iW, iVt] = ['Loại hàng', 'Nhà cung cấp', 'INV', 'TP/PO', 'Mã hàng', 'Đặc tính', 'Size', 'Trọng lượng', 'Vị trí'].map(ix);
-        state.lots.m04 = d4.rows.map((r) => {
-          const itemKey = String(r[iKey]).trim();
-          const key = 'M04|' + itemKey;
-          const soKien = looseNum(r[iTon]);
-          const cho = num(pending[key]);
-          return {
-            raw: r, module: 'M04', key, title: [v(r, iCode), v(r, iSize)].filter(Boolean).join(' — ') || v(r, iType), unit: 'SL',
-            subs: [['Vị trí', shortPlace(v(r, iVt)) || 'Chưa có'], ['Loại', v(r, iType)], ['INV', v(r, iInv)], ['PO', v(r, iPo)]],
-            soKien, cho, con: soKien - cho,
-            item: { itemKey, maHang: v(r, iCode), tenHang: v(r, iType), type: v(r, iType), supplier: v(r, iSup), inv: v(r, iInv), po: v(r, iPo),
-              dacTinh: v(r, iDt), size: v(r, iSize), weight: looseNum(v(r, iW)), viTri: v(r, iVt), soKien },
-            s: norm([v(r, iCode), v(r, iType), v(r, iSup), v(r, iInv), v(r, iPo), v(r, iDt), v(r, iSize), v(r, iVt)].join(' '))
-          };
-        });
-      }
-    }
   }
 
   // Tên hàng dạng "... (quy cách) - <Đặc tính> - <Hợp đồng>": lấy 2 phần SAU CÙNG khi tách theo " - "
@@ -813,8 +784,6 @@
       lot: find(['Số lô']), lotLabel: 'Lô', place: -1, size: find(['Size']) };
     if (mode === 'm03') return { title: find(['Loại Hàng']), code: find(['Mã Hàng']), qty: find(['Tổng (kg)']), unit: -1, unitText: 'kg',
       lot: find(['LSX / Hợp đồng']), lotLabel: 'LSX', place: find(['Vị trí']), size: -1 };
-    if (mode === 'm04') return { title: find(['Mã hàng']), code: -1, qty: find(['SL tồn']), unit: -1, unitText: 'SL',
-      lot: find(['INV']), lotLabel: 'INV', place: find(['Vị trí']), size: find(['Size']) };
     return {
       title: find(['Tên hàng']),
       code: find(['Mã hàng']),
@@ -926,7 +895,7 @@
   // Xuất kho: mỗi nguồn đã có sẵn "subs" (nhãn cột hiển thị ở dòng, VD "Vị trí", "Size"…) — dùng lại
   // đúng các nhãn đó để bảng lọc khớp với những gì người dùng đang thấy trên danh sách, cộng thêm
   // 1 ô tiêu đề (Tên hàng / Mã hàng tuỳ nguồn) chưa nằm trong "subs".
-  const XUAT_TITLE_LABEL = { vitri: 'Mã hàng', vitribot: 'Mã hàng', m03: 'Mã hàng', m04: 'Mã hàng', tong: 'Mã hàng' };
+  const XUAT_TITLE_LABEL = { vitri: 'Mã hàng', vitribot: 'Mã hàng', m03: 'Mã hàng', tong: 'Mã hàng' };
   function xuatFilterFields(src) {
     const lots = state.lots[src] || [];
     const subLabels = lots.length ? lots[0].subs.map(([k]) => k) : [];
@@ -1117,7 +1086,7 @@
           const qs = xuatQueries();
           const onlyAvail = $('onlyAvail').checked;
           const lotHit = makeXuatMatch(qs, state.lots[src]);
-          return (state.lots[src] || []).filter((l) => (!onlyAvail || l.con > 0) && hsdQuickOk(src, l) && khoOk(src, l) && lotHit(l));
+          return (state.lots[src] || []).filter((l) => (!onlyAvail || l.con > 0 || l.daXuat > 0) && hsdQuickOk(src, l) && khoOk(src, l) && lotHit(l));
         }
         const qs = norm(state.q.ton).trim().split(/\s+/).filter(Boolean);
         return (state.tonRows[src] || []).filter((x) => wordsHit(x.s, qs, x));
@@ -1143,10 +1112,10 @@
   // phiếu với SỐ CÒN LẤY ĐƯỢC (sửa lại từng dòng trong phiếu nếu cần). Không lưu qua lần mở app.
   state.multi = { on: false, sel: new Set() };
   const natCmp = new Intl.Collator('vi', { numeric: true, sensitivity: 'base' }).compare;
-  // Đặc tính của 1 dòng: Kho gửi / M04 có cột riêng; An An (M01, Vị trí) tách từ Tên hàng như bảng PC.
+  // Đặc tính của 1 dòng: Kho gửi có cột riêng; An An (M01, Vị trí) tách từ Tên hàng như bảng PC.
   function dtOf(src, it) {
     it = it || {};
-    if (src === 'm02' || src === 'm04') return String(it.dacTinh || '').trim();
+    if (src === 'm02') return String(it.dacTinh || '').trim();
     if (src === 'm01' || src === 'vitri') return String((src === 'm01' && it.dacTinh) || vtSplitName(it.tenHang)[0] || '').trim();
     return '';
   }
@@ -1169,7 +1138,7 @@
     metaRow.classList.toggle('has-toggle', on);
     if (!on) return;
     const cnt = { '': 0 };
-    (lots || []).forEach((l) => { if (onlyAvail && !(l.con > 0)) return; cnt['']++; const k = khoNoOf(l); if (k) cnt[k] = (cnt[k] || 0) + 1; });
+    (lots || []).forEach((l) => { if (onlyAvail && !(l.con > 0 || l.daXuat > 0)) return; cnt['']++; const k = khoNoOf(l); if (k) cnt[k] = (cnt[k] || 0) + 1; });
     Array.from(sel.options).forEach((o) => { o.textContent = (o.value ? 'Kho: Kho ' + o.value : 'Kho: Tổng') + ' (' + fmt(cnt[o.value] || 0) + ')'; });
     if (sel.value !== (state.xuatKho || '')) sel.value = state.xuatKho || '';
     pick.classList.toggle('on', !!state.xuatKho); // cùng kiểu "đang lọc" với nút Sắp xếp
@@ -1228,7 +1197,7 @@
     $('xuatHeadPlace').textContent = KHO[src].place;
     // 2 ô tìm song song (ô 1 HOẶC ô 2) — gợi ý ngắn vì mỗi ô chỉ còn nửa bề ngang; gợi ý đầy đủ để ở title.
     $('xuatSearch').title = { m01: 'Tìm mã hàng, tên, hợp đồng, size', vitri: 'Tìm vị trí, mã hàng, tên, lô', vitribot: 'Tìm vị trí, mã hàng, NSX, HSD, ghi chú',
-      m03: 'Tìm loại hàng, mã hàng, LSX, vị trí', m04: 'Tìm mã hàng, INV, PO, size, vị trí' }[src] || 'Tìm mã hàng, tên, lô, size, phiếu nhập';
+      m03: 'Tìm loại hàng, mã hàng, LSX, vị trí' }[src] || 'Tìm mã hàng, tên, lô, size, phiếu nhập';
     $('xuatSearch').placeholder = src === 'vitri' || src === 'vitribot' ? 'Vị trí / mã…' : 'Tìm giá trị 1';
     const lots = state.lots[src];
     if (!SOURCES.length) {
@@ -1256,7 +1225,7 @@
     const onlyAvail = $('onlyAvail').checked;
     const cf = cfCompile(state.colf.xuat[src]);
     const lotHit = makeXuatMatch(q, lots);
-    const rows = sortLots(src, lots.filter((l) => (!onlyAvail || l.con > 0) && hsdQuickOk(src, l) && khoOk(src, l) && lotHit(l)
+    const rows = sortLots(src, lots.filter((l) => (!onlyAvail || l.con > 0 || l.daXuat > 0) && hsdQuickOk(src, l) && khoOk(src, l) && lotHit(l)
       && cf.every(([k, set]) => set.has(norm(xuatFieldValue(l, k))))));
     renderHsdQuick(src, lots, onlyAvail);
     placeKhoPick(src, lots, onlyAvail);
@@ -1272,8 +1241,8 @@
     if (!lots.length) {
       list.innerHTML = '';
       const emptyTitle = { m02: 'Tồn kho gửi đang trống', m01: 'Tồn kho An An đang trống', vitri: 'Tồn theo vị trí đang trống', vitribot: 'Vị trí Bột đang trống',
-        m03: 'Tồn NXT Bột/Sốt đang trống', m04: 'Tồn NXT TNK/TGC đang trống' }[src];
-      const emptyWhere = { m02: 'Module 02', m01: 'Module 01', vitri: 'Module 01 → Tồn theo vị trí', vitribot: 'Module 01 → Load Data → "Tải dữ liệu vị trí Bột"', m03: 'Module 03', m04: 'Module 04' }[src];
+        m03: 'Tồn NXT Bột/Sốt đang trống' }[src];
+      const emptyWhere = { m02: 'Module 02', m01: 'Module 01', vitri: 'Module 01 → Tồn theo vị trí', vitribot: 'Module 01 → Load Data → "Tải dữ liệu vị trí Bột"', m03: 'Module 03' }[src];
       meta.innerHTML = emptyHtml(emptyTitle, `Trên PC: nạp dữ liệu ở ${emptyWhere} rồi bấm "🔄 Đồng bộ ngay".`);
     } else if (!rows.length) {
       list.innerHTML = '';
@@ -1301,7 +1270,7 @@
     box.hidden = src !== 'vitribot' || !lots.length;
     if (box.hidden) return;
     const cnt = { sap: 0, het: 0 };
-    lots.forEach((l) => { if (!onlyAvail || l.con > 0) { const g = hsdGroup(l); if (g) cnt[g]++; } });
+    lots.forEach((l) => { if (!onlyAvail || l.con > 0 || l.daXuat > 0) { const g = hsdGroup(l); if (g) cnt[g]++; } });
     $('hsdQSap').textContent = cnt.sap ? '(' + fmt(cnt.sap) + ')' : '';
     $('hsdQHet').textContent = cnt.het ? '(' + fmt(cnt.het) + ')' : '';
     box.querySelectorAll('[data-hsdq]').forEach((b) => b.classList.toggle('is-on', b.dataset.hsdq === (state.hsdQ || '')));
@@ -1371,15 +1340,17 @@
     const placeFull = noTpc(KHO[src].placeOf(l.item || {}) || '');
     const place = shortPlace(placeFull);
     const code = noTpc((l.item && l.item.maHang) || l.title);
+    const done = l.daXuat > 0 && l.con <= 0 && !inCart;   // ĐT 1.45: khai báo TRƯỚC khi dùng (bản 1.44 khai báo sau → lỗi, danh sách tồn kho trống)
     const pills = (l.hsdDays != null && l.hsdDays < 10 ? `<span class="pill ${l.hsdDays < 0 ? 'hsd-het' : 'hsd-sap'}">${l.hsdDays < 0 ? 'hết hạn' : 'sắp hết hạn'}</span>` : '')
       + (l.item && l.item.vtMoi ? '<span class="pill chuyen">đang chuyển</span>' : '')
-      + (l.cho ? `<span class="pill wait">chờ PC ${fmt(l.cho)}</span>` : '') + (inCart ? `<span class="pill soan">soạn ${fmt(inCart)}</span>` : '');
+      + (done ? `<span class="pill wait">đã xuất ${fmt(l.daXuat)}</span>` : (l.daXuat > 0 ? `<span class="pill wait">đã xuất ${fmt(l.daXuat)}</span>` : '')) + (l.cho ? `<span class="pill wait">chờ PC ${fmt(l.cho)}</span>` : '') + (inCart ? `<span class="pill soan">soạn ${fmt(inCart)}</span>` : '');
     const kien = l.pack ? ` title="≈ ${fmt(Math.floor(con / l.pack + 1e-9))} kiện"` : '';
     const pickCls = state.multi.on ? (canPick(l) ? (state.multi.sel.has(l.key) ? ' picked' : '') : ' no-pick') : '';
-    return `<li class="row${l.con <= 0 ? ' is-empty' : ''}${inCart ? ' in-cart' : ''}${pickCls}">
-      <button type="button" class="krow" data-lot="${esc(l.key)}" data-src="${src}">
+    const conShow = done ? l.soKien + l.daXuat : con;
+    return `<li class="row${l.con <= 0 ? ' is-empty' : ''}${done ? ' is-done' : ''}${inCart ? ' in-cart' : ''}${pickCls}">
+      <button type="button" class="krow" data-lot="${esc(l.key)}" data-src="${src}"${done ? ' disabled' : ''}>
         <span class="k1"><span class="k-code">${esc(code)}</span><span class="k-place${place ? '' : ' none'}" title="${esc(placeFull)}">${esc(place || '—')}</span>
-          <span class="k-qty"${kien}><b>${fmt(con)}</b>${!khoLabel && state.listUnit && state.listUnit === l.unit ? '' : ` <small>${esc(l.unit)}</small>`}</span></span>
+          <span class="k-qty"${kien}><b>${fmt(conShow)}</b>${!khoLabel && state.listUnit && state.listUnit === l.unit ? '' : ` <small>${esc(l.unit)}</small>`}</span></span>
         <span class="k2">${khoLabel ? `<span class="pill soan">${esc(khoLabel)}</span>` : ''}${l.sizeTag ? `<span class="k-size">${esc(l.sizeTag)}</span>` : ''}<span class="k-name">${esc(lotLine2(src, l))}</span>${pills}</span>
       </button>
     </li>`;
@@ -1392,13 +1363,12 @@
   // (bảng "Lọc theo nhiều cột": Kho, Vị trí, Size, Hợp đồng, Đặc tính), mặc định xếp theo mã hàng rồi kho. Chạm 1 dòng
   // → bảng chi tiết mã đó (CHỈ các dòng đang khớp tìm kiếm + bộ lọc), chạm tiếp 1 dòng trong đó → màn xuất như cũ.
   // Mỗi dòng Tổng là 1 "vỏ" bọc dòng thật (w.lot, w.src) — xuất / phiếu luôn dùng dòng thật của kho gốc.
-  const TONG_ORDER = ['m01', 'vitri', 'vitribot', 'm02', 'm03', 'm04'];
+  const TONG_ORDER = ['m01', 'vitri', 'vitribot', 'm02', 'm03'];
   const tongCache = { refs: null, list: [] };
   function tongHd(src, it) {
     if (src === 'm01') return String(it.hopDong || vtSplitName(it.tenHang)[1] || '').trim();
     if (src === 'vitri') return vtSplitName(it.tenHang)[1] || '';
     if (src === 'm03') return String(it.lsx || '').trim();
-    if (src === 'm04') return String(it.po || '').trim();
     return '';
   }
   function tongLots() {
@@ -1952,7 +1922,7 @@
   const isHuy = (p) => !isPc(p) && String(p.trangThai || '').trim().startsWith('Lỗi - Đã hủy');
   // Chỉ sửa / xóa được khi PC CHƯA nhận (trạng thái trống hoặc "Chưa xử lý"; "Đang sửa" = lần sửa trước bị dở).
   const phieuEditable = (p) => { const tt = String(p.trangThai || '').trim(); return tt === '' || tt === 'Chưa xử lý' || tt.startsWith('Lỗi - Đang sửa'); };
-  // Mốc PC đẩy tồn của ĐÚNG kho chứa phiếu (Meta.lastPushAt_<M01|M01VT|M01VTB|M02|M03|M04>); thiếu thì dùng mốc chung.
+  // Mốc PC đẩy tồn của ĐÚNG kho chứa phiếu (Meta.lastPushAt_<M01|M01VT|M01VTB|M02|M03>); thiếu thì dùng mốc chung.
   // Trước đây mọi phiếu đều so với mốc chung — mốc này chỉ tiến khi PC đẩy ĐỦ mọi bảng, nên phiếu đã nhận
   // bị kẹt ở \"đang cập nhật tồn\" dù kho của phiếu đó đã được đẩy lại.
   function lastPushOfPhieu(p) {
@@ -2015,8 +1985,19 @@
   // ---- ĐT 1.35: chi tiết dòng phiếu Vị trí (M01VT) đầy đủ như PC + nút đổi hiển thị mã ----
   // maMode: 'full' = mã 21 ký tự · 'label' = nhãn Size có tiền tố (NL 120, BTP 60…). Chỉ đổi cách HIỂN THỊ / xuất file — KHÔNG gộp dòng,
   // mỗi dòng giữ nguyên Vị trí · Đặc tính · Hợp đồng · Net (khác nút "Gộp theo Size" trên PC).
-  const LS_MAMODE = 'klanan.phieuMaMode';
-  let maMode = (() => { try { return localStorage.getItem(LS_MAMODE) === 'label' ? 'label' : 'full'; } catch (e) { return 'full'; } })();
+  // ĐT 1.40: mặc định GỌN = nhãn Size + quy cách ("BTP 50 (1.8KG)"), chỉ hiện mã 21 ký tự khi dòng không quy ra được nhãn Size (khóa lưu mới để áp mặc định mới cho mọi máy).
+  const LS_MAMODE = 'klanan.phieuMaMode2';
+  let maMode = (() => { try { return localStorage.getItem(LS_MAMODE) === 'full' ? 'full' : 'label'; } catch (e) { return 'label'; } })();
+  const vtFil = {};   // ĐT 1.40: nhóm Size đang lọc của từng phiếu (id phiếu → khóa nhóm; '' = tất cả)
+  // Quy cách đóng gói ngắn từ Tên hàng: "…(1.8 kg x 6 gói)…" → "1.8KG". Không có → ''.
+  function vtQc(ten) {
+    const head = String(ten ?? '').split(' - ')[0], groups = head.match(/\(([^()]*)\)/g) || [];
+    for (let i = groups.length - 1; i >= 0; i--) {
+      const m = groups[i].slice(1, -1).match(/(\d+(?:[.,]\d+)?)\s*(kg|gr|gram|g|lbs|lb)\b/i);
+      if (m) return m[1].replace(',', '.') + ({ gr: 'G', gram: 'G' }[m[2].toLowerCase()] || m[2].toUpperCase());
+    }
+    return '';
+  }
   function setMaMode(m) { maMode = m === 'label' ? 'label' : 'full'; try { localStorage.setItem(LS_MAMODE, maMode); } catch (e) { /* bỏ qua */ } }
   // Thông tin 1 dòng phiếu Vị trí: p = phiếu (dòng thô trên Sheet), it = dòng hàng.
   function vtLineInfo(p, it) {
@@ -2036,21 +2017,31 @@
       per = sn ? kgPerOf('M01VT', sn) : (lot ? kgPerOf('M01VT', lot.item) : 0);
     }
     const qty = num(it.soLuongXuat);
-    return { codes, code: codes.join(', ') || noTpc(raw), label, vt: shortPlace(it.viTri || ''), dt: String(it.soLo || old[0] || '').trim(), hd: String(it.hopDong || old[1] || '').trim(), qty, net: per > 0 ? qty * per : 0, per };
+    const code0 = codes.join(', ') || noTpc(raw), qc = vtQc(it.tenHang), name = label ? label + (qc ? ' (' + qc + ')' : '') : code0;
+    return { codes, code: code0, label, qc, name, gkey: label ? label + '|' + qc : code0, vt: shortPlace(it.viTri || ''), dt: String(it.soLo || old[0] || '').trim(), hd: String(it.hopDong || old[1] || '').trim(), qty, net: per > 0 ? qty * per : 0, per };
   }
   function vtLinesHtml(p) {
     const lines = sortVt(p.items || []).map((it) => vtLineInfo(p, it));
+    // ĐT 1.40: gom theo nhóm (nhãn Size + quy cách; không có nhãn thì theo mã) để LỌC và xem tổng SL từng nhóm.
+    const gm = new Map();
+    lines.forEach((l) => { const g = gm.get(l.gkey) || { key: l.gkey, name: l.name, qty: 0, n: 0 }; g.qty += l.qty; g.n++; gm.set(l.gkey, g); });
+    const groups = Array.from(gm.values()).sort((a, b) => a.name.localeCompare(b.name, 'vi', { numeric: true }));
+    const fk = vtFil[p.id] && gm.has(vtFil[p.id]) ? vtFil[p.id] : '';
     let sq = 0, sk = 0, miss = 0;
-    lines.forEach((l) => { sq += l.qty; if (l.net > 0) sk += l.net; else if (l.qty > 0) miss++; });
-    const bar = `<div class="ma-mode" role="group" aria-label="Cách hiển thị mã hàng"><span>Mã hàng:</span><div class="segmented"><button type="button" class="seg${maMode === 'full' ? ' is-on' : ''}" data-mamode="full">Mã 21 ký tự</button><button type="button" class="seg${maMode === 'label' ? ' is-on' : ''}" data-mamode="label">Nhãn Size (NL 120…)</button></div></div>`;
-    const cards = lines.map((l, i) => {
-      const main = maMode === 'label' && l.label ? l.label : l.code;
-      const sub = maMode === 'label' ? (l.label ? l.code : '') : (l.label ? l.label : '');
+    const shown = lines.map((l, i) => ({ l, i })).filter((x) => !fk || x.l.gkey === fk);
+    shown.forEach(({ l }) => { sq += l.qty; if (l.net > 0) sk += l.net; else if (l.qty > 0) miss++; });
+    const allQty = lines.reduce((a, l) => a + l.qty, 0), pid = esc(p.id);
+    const chips = groups.length > 1 ? `<div class="vtf" role="group" aria-label="Lọc theo Size / mặt hàng"><button type="button" class="vtf-chip${fk ? '' : ' is-on'}" data-vtf="" data-vtfp="${pid}">Tất cả <b>${esc(fmt(allQty))}</b></button>${groups.map((g) => `<button type="button" class="vtf-chip${g.key === fk ? ' is-on' : ''}" data-vtf="${esc(g.key)}" data-vtfp="${pid}">${esc(g.name)} <b>${esc(fmt(g.qty))}</b></button>`).join('')}</div>` : '';
+        const bar = `<div class="ma-mode" role="group" aria-label="Cách hiển thị mã hàng"><span>Hiển thị:</span><div class="segmented"><button type="button" class="seg${maMode === 'full' ? ' is-on' : ''}" data-mamode="full">Mã 21 ký tự</button><button type="button" class="seg${maMode === 'label' ? ' is-on' : ''}" data-mamode="label">Gọn: Size + quy cách</button></div></div>`;
+    const cards = shown.map(({ l, i }) => {
+      const main = maMode === 'label' ? l.name : l.code;
+      const sub = maMode === 'label' ? '' : (l.label ? l.name : '');
       const kv = [['Vị trí', l.vt], ['Đặc tính', l.dt], ['Hợp đồng', l.hd], ['Net xuất', l.net > 0 ? fmtKg(l.net) + ' kg' : '']].filter((x) => x[1]);
       return `<div class="vtl"><div class="vtl-top"><span class="vtl-n">${i + 1}</span><div class="vtl-code"><b>${esc(main)}</b>${sub ? `<small>${esc(sub)}</small>` : ''}</div><div class="vtl-qty"><b>${esc(fmt(l.qty))}</b><small>SL xuất</small></div></div>${kv.length ? `<div class="vtl-kv">${kv.map(([k, v]) => `<span><i>${esc(k)}</i>${esc(v)}</span>`).join('')}</div>` : ''}</div>`;
     }).join('');
-    const tot = `<div class="vtl-tot">Tổng ${esc(fmt(lines.length))} dòng · SL <b>${esc(fmt(sq))}</b>${sk > 0 ? ` · Net ${miss ? '≥ ' : ''}<b>${esc(fmtKg(sk))} kg</b>` : ''}</div>`;
-    return `<div class="vtl-wrap">${bar}${cards}${tot}</div>`;
+    const fg = fk ? gm.get(fk) : null;
+    const tot = `<div class="vtl-tot">${fg ? esc(fg.name) + ': ' : 'Tổng '}${esc(fmt(shown.length))} dòng · SL <b>${esc(fmt(sq))}</b>${sk > 0 ? ` · Net ${miss ? '≥ ' : ''}<b>${esc(fmtKg(sk))} kg</b>` : ''}${fg ? ` <small>(cả phiếu: ${esc(fmt(lines.length))} dòng · SL ${esc(fmt(allQty))})</small>` : ''}</div>`;
+    return `<div class="vtl-wrap">${bar}${chips}${cards}${tot}</div>`;
   }
   // Đổi mã các dòng của phiếu M01VT trong file xuất theo maMode (không gộp dòng).
   function applyMaMode(doc) {
@@ -2058,12 +2049,38 @@
     const tag = sizeTagger();
     return Object.assign({}, doc, { items: (doc.items || []).map((it) => {
       const codes = String(it.maHang || '').split(/\s*,\s*/).map(noTpc).filter(Boolean);
-      const lb = it.maLabel || (codes.length === 1 ? tag(codes[0], '') : '');
+      const lb0 = it.maLabel || (codes.length === 1 ? tag(codes[0], '') : ''), qc = lb0 && !it.maLabel ? vtQc(it.tenHang) : '', lb = lb0 ? lb0 + (qc ? ' (' + qc + ')' : '') : '';
       return lb ? Object.assign({}, it, { maHang: lb }) : it;
     }) });
   }
   let phieuBase = [];
+  // ĐT 1.44 — THỐNG KÊ SIZE đã làm phiếu (kho Tồn vị trí An An): mỗi Size bao nhiêu kiện đã xuất hôm nay (PC đẩy "Xuất hôm nay"), chờ PC, đang soạn; kèm đặc tính đã gộp.
+  function renderVtStat() {
+    const host = $('phieuStat');
+    if (!host) return;
+    const lots = (state.lots && state.lots.vitri) || [];
+    const by = new Map();
+    const get = (l) => {
+      const k = l.sizeTag || noTpc((l.item && l.item.maHang) || l.title) || '?';
+      let o = by.get(k); if (!o) { o = { k, dts: new Set(), done: 0, cho: 0, soan: 0 }; by.set(k, o); }
+      if (l.nhomDt) o.dts.add(l.nhomDt);
+      return o;
+    };
+    lots.forEach((l) => { if (l.homNay > 0 || l.cho > 0) { const o = get(l); o.done += l.homNay > 0 ? l.homNay : 0; o.cho += l.cho > 0 ? l.cho : 0; } });
+    if (state.cart && state.cart.items.length && state.cart.module === 'M01VT') {
+      const byKey = new Map(lots.map((l) => [l.key, l]));
+      state.cart.items.forEach((it) => { const l = byKey.get(it.key); if (l) get(l).soan += num(it.qty); });
+    }
+    const L = Array.from(by.values()).filter((o) => o.done || o.cho || o.soan).sort((a, b) => natCmp(a.k, b.k));
+    if (!L.length) { host.innerHTML = ''; return; }
+    let td = 0, tc = 0, ts = 0;
+    const rows = L.map((o) => { td += o.done; tc += o.cho; ts += o.soan; return `<tr><td><b>${esc(o.k)}</b></td><td>${esc(Array.from(o.dts).sort().join(', ') || '—')}</td><td class="n">${fmt(o.done)}</td><td class="n">${o.cho ? fmt(o.cho) : ''}</td><td class="n">${o.soan ? fmt(o.soan) : ''}</td></tr>`; }).join('');
+    host.innerHTML = `<details class="vt-stat" open><summary><b>📊 Size đã làm phiếu hôm nay</b> <small>(Tồn vị trí An An)</small></summary>
+      <table><thead><tr><th>Size</th><th>Đặc tính</th><th class="n">Đã xuất</th><th class="n">Chờ PC</th><th class="n">Soạn</th></tr></thead><tbody>${rows}</tbody>
+      <tfoot><tr><td colspan="2"><b>Tổng</b></td><td class="n"><b>${fmt(td)}</b></td><td class="n"><b>${tc ? fmt(tc) : ''}</b></td><td class="n"><b>${ts ? fmt(ts) : ''}</b></td></tr></tfoot></table></details>`;
+  }
   function renderPhieu() {
+    try { renderVtStat(); } catch (e) { /* thống kê lỗi không được làm hỏng trang Phiếu */ }
     const pfBar = $('phieuFBar');
     if (pfBar) pfBar.hidden = state.phieuSeg === 'soan';
     if ($('phieuFBtn') && !$('phieuFBtn').onclick) $('phieuFBtn').onclick = () => openFilterSheet({ fields: PHIEU_FIELDS, store: state.pcf, valueOf: phieuVal, baseRows: () => phieuBase, rerender: renderPhieu });
@@ -2165,7 +2182,7 @@
               + `<dt></dt><dd>${hiddenPhieu[p.id]
                 ? `<button type="button" class="btn btn-ghost" data-unhide="${esc(p.id)}" style="min-height:44px;font-size: calc(15px * var(--fs, 1));margin:2px 0 4px">👁 Bỏ ẩn phiếu này</button>`
                 : `<button type="button" class="btn btn-ghost" data-an="${esc(p.id)}" style="min-height:44px;font-size: calc(15px * var(--fs, 1));margin:2px 0 4px">🙈 Ẩn khỏi danh sách (chỉ trên máy này)</button>`}</dd>`}
-          ${modOf(String(p.module || '').trim()) === 'M01VT' ? '' : sortVt(p.items || []).map((it) => `<dt>${esc(fmt(num(it.soLuongXuat)))}</dt><dd>${it.viTri ? '[' + esc(shortPlace(it.viTri)) + '] ' : ''}${esc(noTpc(['M01VT', 'M01VTB'].includes(modOf(String(p.module || '').trim())) ? (it.maHang || it.tenHang) : (it.tenHang || it.maHang)))}${it.soLo && modOf(String(p.module || '').trim()) !== 'M01VT' ? (modOf(String(p.module || '').trim()) === 'M03' ? ' — LSX ' : modOf(String(p.module || '').trim()) === 'M04' ? ' — ' : modOf(String(p.module || '').trim()) === 'M01VTB' ? ' — NSX ' : ' — lô ') + esc(it.soLo) : ''}${it.hopDong ? ' — HĐ ' + esc(it.hopDong) : ''}${it.size !== '' && it.size !== undefined ? ', size ' + esc(it.size) : ''}</dd>`).join('')}
+          ${modOf(String(p.module || '').trim()) === 'M01VT' ? '' : sortVt(p.items || []).map((it) => `<dt>${esc(fmt(num(it.soLuongXuat)))}</dt><dd>${it.viTri ? '[' + esc(shortPlace(it.viTri)) + '] ' : ''}${esc(noTpc(['M01VT', 'M01VTB'].includes(modOf(String(p.module || '').trim())) ? (it.maHang || it.tenHang) : (it.tenHang || it.maHang)))}${it.soLo && modOf(String(p.module || '').trim()) !== 'M01VT' ? (modOf(String(p.module || '').trim()) === 'M03' ? ' — LSX ' : modOf(String(p.module || '').trim()) === 'M01VTB' ? ' — NSX ' : ' — lô ') + esc(it.soLo) : ''}${it.hopDong ? ' — HĐ ' + esc(it.hopDong) : ''}${it.size !== '' && it.size !== undefined ? ', size ' + esc(it.size) : ''}</dd>`).join('')}
         </dl>${modOf(String(p.module || '').trim()) === 'M01VT' ? vtLinesHtml(p) : ''}` : ''}
       </li>`;
     }).join('');
@@ -2190,7 +2207,6 @@
     if (state.tab === 'baocao') renderBaoCao();
     if (window.C3DPhone) { if (state.tab === 'c3d') window.C3DPhone.show(); else window.C3DPhone.hide(); }
     if (window.QrPhone) { if (state.tab === 'qr') window.QrPhone.show(); else window.QrPhone.hide(); }
-    if (window.LtPhone) { if (state.tab === 'lt') window.LtPhone.show(); else window.LtPhone.hide(); }
     if (window.ScanPhone) { if (state.tab === 'scan') window.ScanPhone.show(); else window.ScanPhone.hide(); }
     if (state.tab !== 'xuat') updateTotalBar(null);
     renderCartBar();
@@ -2293,9 +2309,9 @@
   }
 
   // Tổng số kg của cả 1 kho (cho thẻ Kho / bảng chọn kho). M03 vốn đã tính bằng kg (cột "Tổng (kg)")
-  // nên cộng thẳng "con"; M01/M02/vitri/M04 nhân "con" với trọng lượng/đơn vị của từng dòng
+  // nên cộng thẳng "con"; M01/M02/vitri nhân "con" với trọng lượng/đơn vị của từng dòng
   // (M01: kgPer = Tồn cuối (NET) × Trọng lượng ÷ Tồn cuối — khớp "Tổng KL (kg)" trên PC).
-  const KHO_KG_PER = { m01: (it) => num(it.kgPer), m02: (it) => num(it.kgPer), vitri: (it) => num(it.tl), m04: (it) => num(it.weight) };
+  const KHO_KG_PER = { m01: (it) => num(it.kgPer), m02: (it) => num(it.kgPer), vitri: (it) => num(it.tl) };
   function khoTotalKg(k) {
     const lots = state.lots[k] || [];
     if (!lots.length) return null;
@@ -2372,8 +2388,6 @@
       svg: '<path d="M4 8V5.5A1.5 1.5 0 0 1 5.5 4H8M16 4h2.5A1.5 1.5 0 0 1 20 5.5V8M20 16v2.5a1.5 1.5 0 0 1-1.5 1.5H16M8 20H5.5A1.5 1.5 0 0 1 4 18.5V16"/><path d="M8 9h8M8 12h8M8 15h5"/>' },
     { id: 'qr', name: 'Tạo mã QR', sub: 'Tạo mã đơn lẻ hoặc hàng loạt từ Excel, lưu / chia sẻ ảnh', ok: () => canQr(),
       svg: '<path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4z"/><path d="M7 7h.01M17 7h.01M7 17h.01M14 14h2.5v2.5M20 14v.01M14 20h.01M17.5 20H20v-3.5"/>' },
-    { id: 'lt', name: 'Lưu trữ cá nhân', sub: 'Khung chat riêng lưu tin nhắn, ảnh, file — đồng bộ với PC', ok: () => canLt(),
-      svg: '<path d="M7 18a4.5 4.5 0 0 1-.6-8.96A5.5 5.5 0 0 1 17 8.5a4 4 0 0 1 .5 7.97V16.5"/><path d="M8 18h9.5"/>' },
   ];
   function renderTools() {
     // ĐT 0.9: thẻ công cụ dạng ô vuông 2 cột (hàng trên: icon trong ô + nút chuyển · dưới: tên + mô tả) — lớp mới tl-* (tên cũ tool-* bỏ để không dính CSS cũ trong bộ nhớ đệm)
@@ -2385,10 +2399,10 @@
 
   // ------------------------------------------------------------------ Trang chủ
   // Mốc "nạp tồn kho mới" trên PC của từng kho (Meta do main.js ghi): phiếu PC nhận (xuLyLuc) trước mốc
-  // này là của kỳ tồn CŨ. M03/M04 là sổ nhập–xuất cộng dồn (không nạp lại cả kho) nên không áp dụng.
+  // này là của kỳ tồn CŨ. M03 là sổ nhập–xuất cộng dồn (không nạp lại cả kho) nên không áp dụng.
   const IMPORT_AT_KEY = { M02: 'm02ImportedAt', M01: 'm01ImportedAt', M01VT: 'm01ViTriImportedAt', M01VTB: 'm01ViTriBotImportedAt' };
   function anyMeta() {
-    for (const k of ['m02', 'm01', 'vitri', 'vitribot', 'm03', 'm04', 'm08']) { const m = state[k] && state[k].data && state[k].data.meta; if (m) return m; }
+    for (const k of ['m02', 'm01', 'vitri', 'vitribot', 'm03', 'm08']) { const m = state[k] && state[k].data && state[k].data.meta; if (m) return m; }
     return {};
   }
   function isOldPeriod(p, meta) {
@@ -2614,7 +2628,7 @@
     const ngayXuat = state.cart.module === 'M02' ? String(state.cart.ngayXuat || '').trim() : '';
     const phieu = {
       id: state.cart.id,                       // giữ nguyên qua các lần bấm gửi lại -> không trùng
-      maPhieu: state.cart.maPhieu || (state.cart.maPhieu = (tenPhieu || stamp())),
+      maPhieu: state.cart.maPhieu || (state.cart.maPhieu = (tenPhieu || stamp(state.cart.module))),
       ngayXuat,                                 // ngày xuất do người dùng chọn (PC/Sheet hiện chưa lưu cột này)
       nguoiTao: state.cfg.name,
       ghiChu: state.cart.ghiChu,
@@ -2669,7 +2683,7 @@
 
   // ================================================================ SỬA / XÓA PHIẾU CHƯA ĐƯỢC PC NHẬN
   const findPhieu = (id) => ((state.phieu && state.phieu.data && state.phieu.data.list) || []).find((x) => String(x.id) === String(id));
-  const LOT_PREFIX = { M01: 'M01|', M01VT: 'VT|', M01VTB: 'M01VTB|', M03: 'M03|', M04: 'M04|' };
+  const LOT_PREFIX = { M01: 'M01|', M01VT: 'VT|', M01VTB: 'M01VTB|', M03: 'M03|' };
 
   // Nạp phiếu vào khung "đang soạn" ở chế độ sửa (giữ nguyên id/mã phiếu; Web App thay toàn bộ dòng hàng).
   async function startEditPhieu(id) {
@@ -2808,8 +2822,6 @@
   }
 
   window.KLShare = { saveToPhone, shareFile, toast: (t, e) => toast(t, e), api: (a, x) => api(a, x), cfgOk: () => cfgOk() }; // dùng chung cho Xếp cont 3D (c3d-phone.js)
-  // ĐT 1.02 — cầu nối cho Lưu trữ cá nhân (luu-tru.html chạy trong iframe, đọc window.parent.LTHost): kết nối Web App + lưu / chia sẻ file.
-  window.LTHost = { cfg: () => ({ url: state.cfg.url, token: state.cfg.token, user: String(state.cfg.user || '').trim() }), api: (a, x) => api(a, x), KLShare: window.KLShare };
   function openExportSheet(doc, message) {
     let file = null;
     const render = (busy, notice) => {
@@ -3372,7 +3384,7 @@
   // của điện thoại (prefers-color-scheme) và tự đổi khi máy đổi. index.html có đoạn script nhỏ trong <head>
   // đặt data-theme TRƯỚC khi trang hiện (tránh nháy trắng khi mở ở chế độ Tối) — giữ 2 nơi giống nhau.
   const LS_THEME = 'klanan.theme';
-  const THEME_BAR = { light: '#FFFFFF', dark: '#0A1118' }; // màu thanh trạng thái Android = màu thanh trên
+  const THEME_BAR = { light: '#FFFFFF', dark: '#09090A' }; // màu thanh trạng thái Android = màu thanh trên
   const darkMQ = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
   function themeChoice() { try { const t = localStorage.getItem(LS_THEME); return t === 'dark' || t === 'auto' ? t : 'light'; } catch (e) { return 'light'; } }
   function currentTheme() { return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'; }
@@ -3548,16 +3560,16 @@
   // 3.1 (PC 7.43): ĐẦY ĐỦ như app PC — 4 vai trò, kho điện thoại + module PC từng người, cấp bậc (không xem mã / sửa / xóa người cùng cấp hoặc cao hơn),
   // Quản lý được cấp quyền Tài khoản, Quản trị tự bỏ tick module / kho. Luật kiểm tra thật nằm ở Web App (Code.gs › pqSave_) — nơi này chỉ khóa ô cho dễ dùng.
   const PQ_KHO = [['M01', 'Tồn kho An An'], ['M01VT', 'Tồn theo vị trí'], ['M01VTB', 'Vị trí Bột'], ['M02', 'Tồn kho gửi'],
-    ['M08', 'Tra cứu kháng sinh'], ['BC01', 'Báo cáo Tồn kho An An'], ['BC02', 'Báo cáo Tồn kho gửi'], ['LX', 'Lịch xuất nhập hàng'], ['C3D', 'Xếp cont 3D'], ['SCAN', 'Scan tài liệu'], ['QR', 'Tạo mã QR'], ['LT', 'Lưu trữ cá nhân'],
-    ['M03', 'NXT Bột/Sốt'], ['M04', 'NXT TNK/TGC']];
+    ['M08', 'Tra cứu kháng sinh'], ['BC01', 'Báo cáo Tồn kho An An'], ['BC02', 'Báo cáo Tồn kho gửi'], ['LX', 'Lịch xuất nhập hàng'], ['C3D', 'Xếp cont 3D'], ['SCAN', 'Scan tài liệu'], ['QR', 'Tạo mã QR'],
+    ['M03', 'NXT Bột/Sốt']];
   // Module mở được trên app PC + quyền riêng từng mục Cài đặt — GIỐNG PQ_PC (main.js) / PC (tai-khoan.js)
   const PQ_PC = [['M01', '01 · Tồn An An'], ['M01VT', '01 · Tồn theo vị trí'], ['M01VTB', '01 · Vị trí bột'], ['M02', '02 · Tồn Kho Gửi'],
-    ['M03', '03 · NXT Bột/Sốt'], ['M04', '04 · NXT TNK/TGC'], ['M05', '05.1 · Đối chiếu số liệu › Số liệu kiểm kê'], ['M06', '06 · In Chứng Từ Kho'], ['M15', '06.1 · Scan tài liệu'], ['M17', '06.2 · Tạo mã QR'], ['M19', '06.4 · Lưu trữ cá nhân'],
+    ['M03', '03 · NXT Bột/Sốt'], ['M05', '05.1 · Đối chiếu số liệu › Số liệu kiểm kê'], ['M06', '06 · In Chứng Từ Kho'], ['M15', '06.1 · Scan tài liệu'], ['M17', '06.2 · Tạo mã QR'],
     ['M07', '05.2 · Đối chiếu số liệu › Số liệu cuối kỳ'], ['M08', '07 · Tổng Hợp'], ['M09', '08 · Phiếu Xuất Toàn Hệ Thống'], ['M16', '05.3 · Đối chiếu hàng ngày'], ['M13', '05 · Phiếu nhập/xuất kho'], ['M14', '12 · Container Loading 3D'], ['LX_EMAIL', 'Trang chính › Lịch xuất: duyệt email'],
     ['CD_SAOLUU', 'Cài đặt › Sao lưu Drive (toàn quyền)'], ['CD_KHOIPHUC', 'Cài đặt › Khôi phục Drive'], ['CD_DONGBO', 'Cài đặt › Đồng bộ điện thoại'],
     ['TAIKHOAN', 'Cài đặt › Tài khoản (quản lý người dùng)']];
   const PQ_FIXED_PC = ['CD_SAOLUU', 'CD_KHOIPHUC', 'CD_DONGBO', 'TAIKHOAN', 'LX_EMAIL']; // Quản trị luôn có — không tự khóa mình khỏi Cài đặt / Tài khoản
-  const PQ_KHO2PC = { M01: 'M01', M01VT: 'M01VT', M01VTB: 'M01VTB', BC01: 'M01', M02: 'M02', BC02: 'M02', M03: 'M03', M04: 'M04', M08: 'M08', C3D: 'M14', SCAN: 'M15', QR: 'M17', LT: 'M19' };
+  const PQ_KHO2PC = { M01: 'M01', M01VT: 'M01VT', M01VTB: 'M01VTB', BC01: 'M01', M02: 'M02', BC02: 'M02', M03: 'M03', M08: 'M08', C3D: 'M14', SCAN: 'M15', QR: 'M17' };
   const PQ_QUYEN = { xem: 'Người dùng cấp 1', xuat: 'Người dùng cấp 2', quanly: 'Quản lý', quantri: 'Admin' };
   const PQ_ROLE_OPT = { xem: 'Người dùng cấp 1 — chỉ xem', xuat: 'Người dùng cấp 2 — xem + tạo phiếu xuất', quanly: 'Quản lý — + sửa / xóa mọi phiếu', quantri: 'Admin — toàn quyền (chỉ Developer tạo được)' };
   const PQ_ROLE_HINT = {
@@ -3706,7 +3718,7 @@
   }
 
   // ------------------------------------------------------------------ tải dữ liệu
-  const ACTION = { m02: 'tonKhoGui', m01: 'tonKho', vitri: 'viTri', vitribot: 'viTriBot', m03: 'tonKhoM03', m04: 'tonKhoM04', m08: 'm08', phieu: 'phieu' };
+  const ACTION = { m02: 'tonKhoGui', m01: 'tonKho', vitri: 'viTri', vitribot: 'viTriBot', m03: 'tonKhoM03', m08: 'm08', phieu: 'phieu' };
   function neededFor(tab) {
     // Trang chủ cần số liệu của MỌI kho được dùng (ô tổng tồn + tìm mã trong mọi kho): lần đầu tải đủ 5 kho
     // một lượt; từ đó dùng bản lưu trên máy, chỉ tải lại kho nào PC vừa đẩy bản mới.
@@ -3718,14 +3730,13 @@
     if (tab === 'c3d') return []; // Xếp cont 3D chạy tại chỗ, không tải gì
     if (tab === 'scan') return []; // Scan tài liệu chạy tại chỗ, không tải gì
     if (tab === 'qr') return []; // Tạo mã QR chạy tại chỗ, không tải gì
-    if (tab === 'lt') return []; // Lưu trữ cá nhân tự đồng bộ riêng (lt-backend.js), không tải bảng kho
     if (tab === 'baocao') return []; // báo cáo tải riêng (loadReports), không cần bảng kho
     return ['phieu', 'm02'];
   }
 
   const queuedKeys = new Set();
   // ĐT 1.17: tên nguồn trong popup tiến trình tải dữ liệu (mẫu 1)
-  const REFRESH_LBL = { m02: SRC_LABEL.M02, m01: SRC_LABEL.M01, vitri: SRC_LABEL.M01VT, vitribot: SRC_LABEL.M01VTB, m03: SRC_LABEL.M03, m04: SRC_LABEL.M04, m08: 'Tổng hợp (M08)', phieu: 'Phiếu đã gửi' };
+  const REFRESH_LBL = { m02: SRC_LABEL.M02, m01: SRC_LABEL.M01, vitri: SRC_LABEL.M01VT, vitribot: SRC_LABEL.M01VTB, m03: SRC_LABEL.M03, m08: 'Tổng hợp (M08)', phieu: 'Phiếu đã gửi' };
   async function refresh(keys, opt) {
     if (!cfgOk()) { openSettings(true); return; }
     const list = keys || neededFor(state.tab);
@@ -4198,7 +4209,7 @@
     if (b) switchTab(b.dataset.tool);
   });
   document.querySelectorAll('[data-toolback]').forEach((b) => b.addEventListener('click', () => switchTab('tools')));
-  $('refreshBtn').addEventListener('click', () => { if (state.tab === 'c3d' || state.tab === 'scan' || state.tab === 'qr' || state.tab === 'lt' || state.tab === 'tools') return; if (state.tab === 'baocao') loadReports(true); else { if (state.tab === 'home') loadLx(true); refresh(undefined, { dialog: true }); } });
+  $('refreshBtn').addEventListener('click', () => { if (state.tab === 'c3d' || state.tab === 'scan' || state.tab === 'qr' || state.tab === 'tools') return; if (state.tab === 'baocao') loadReports(true); else { if (state.tab === 'home') loadLx(true); refresh(undefined, { dialog: true }); } });
   $('homeLx').addEventListener('click', (e) => {
     if (e.target.closest('[data-lxbadx]')) { lxBadDismiss(); return; }
     if (e.target.closest('[data-lxadd]')) { openLxQuick(lxq.loai); return; }
@@ -4456,6 +4467,8 @@
       if (p) openExportSheet(applyMaMode(docFromSheet(p)));
       return;
     }
+    const vf = e.target.closest('[data-vtf]');
+    if (vf) { vtFil[vf.dataset.vtfp] = vf.dataset.vtf; renderPhieu(); return; }
     const mm = e.target.closest('[data-mamode]');
     if (mm) { setMaMode(mm.dataset.mamode); renderPhieu(); return; }
     const b = e.target.closest('[data-open]');
